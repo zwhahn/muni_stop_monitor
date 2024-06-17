@@ -1,8 +1,15 @@
 import requests
-import os
+import config
 
-api_file = 
-api_key = 
+# API Parameters
+api_key = config.api_key
+agency = 'AC'
+url = f'http://api.511.org/transit/StopMonitoring?api_key={api_key}&agency={agency}'
 
-r = requests.get(http://api.511.org/transit/StopMonitoring?api_key={your-key}&agency=AC)
+response = requests.get(url)
+status = response.status_code
+if status == 200:
+    print("Succesful Request")
+else:
+    print(f'Request Fail: {status}')
 
