@@ -5,8 +5,8 @@ import json
 
 # API Parameters
 api_key = config.api_key
-agency = 'AC'
-stop_code = '14623'
+agency = 'SF'
+stop_code = '14624'
 
 
 url = f'http://api.511.org/transit/StopMonitoring?api_key={api_key}&agency={agency}&stopCode={stop_code}&format=JSON'
@@ -18,11 +18,11 @@ if status == 200:
 else:
     print(f'Request Fail: {status}')
 
-headers = response.headers['content-type']
+headers = response.headers
 
 # JSON formatted resopnse, method from: https://groups.google.com/g/511sfbaydeveloperresources/c/K40TiNf8ydA
 response_json = json.loads(codecs.decode(response.content, encoding='utf-8-sig'))
 
-print(response_json)
+print(response_json['ServiceDelivery']['StopMonitoringDelivery']['MonitoredStopVisit'])
 
 
