@@ -30,7 +30,7 @@ for item in response_json:
     # print("item: ", item)
     
     for subitem in response_json[item]:
-        # print("subitem: ", subitem)
+        # print("subitem: ", response_json[item][subitem])
 
         # Check request status- Indicates success or failure of request.
         if subitem == "Status":
@@ -40,27 +40,24 @@ for item in response_json:
                 print("Request Failed")
         
         if subitem == "StopMonitoringDelivery":
-            print("Entered StopMonitoringDelivery")
+            # print("Entered StopMonitoringDelivery")
             for subsubitem in response_json[item][subitem]:
-                # print("subsub: ", subsubitem)
+                # print("subsub: ", response_json[item][subitem][subsubitem])
                 pass
             if subsubitem == 'MonitoredStopVisit':
                 # print("Entered MonitoredStopVisit")
                 for subsubsubitem in response_json[item][subitem][subsubitem]:
-                    # print("subsubsubitem:", subsubsubitem)
-                    for foursub in response_json[item][subitem][subsubitem][0]:
-                        # print("foursub: ", foursub)
-                        if foursub == "MonitoredVehicleJourney":
-                            # print("MonitoredVehicleJourney:", response_json[item][subitem][subsubitem][0]['MonitoredVehicleJourney'])
+                    # print("subsubsubitem type:", type(subsubsubitem))
+                    for foursub in subsubsubitem['MonitoredVehicleJourney']:
+                        if foursub == 'Monitored':
+                            monitored_status = subsubsubitem['MonitoredVehicleJourney']['Monitored']
+                            print("Monitor Status: ", monitored_status)
 
-                            #Check that trip is monitiored
-                            # print(response_json[item][subitem][subsubitem][0]['MonitoredVehicleJourney']['Monitored'])
+                        # Data for the stop
+                        if foursub == 'MonitoredCall':
 
-                            # Data for the stop
-                            # print(response_json[item][subitem][subsubitem][0]['MonitoredVehicleJourney']['MonitoredCall'])
-                            
                             # Convert Expected Arrival Time from string to DateTime object 
-                            expected_arrival_time_str_UTC = response_json[item][subitem][subsubitem][0]['MonitoredVehicleJourney']['MonitoredCall']['ExpectedArrivalTime']
+                            expected_arrival_time_str_UTC = subsubsubitem['MonitoredVehicleJourney']['MonitoredCall']['ExpectedArrivalTime']
                             expected_arrival_time_UTC = datetime.strptime(expected_arrival_time_str_UTC, '%Y-%m-%dT%H:%M:%SZ')
 
                             # Correct timezone (UTC to PT)
@@ -72,7 +69,3 @@ for item in response_json:
 
 
                             print("ExpectedArrivalTime: ", expected_arrival_time_PT)
-
-
-                            
-
