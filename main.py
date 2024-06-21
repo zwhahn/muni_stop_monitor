@@ -2,6 +2,8 @@ import requests
 import config
 import codecs
 import json
+from datetime import datetime
+import pytz
 
 # API Parameters
 api_key = config.api_key
@@ -56,9 +58,20 @@ for item in response_json:
 
                             # Data for the stop
                             # print(response_json[item][subitem][subsubitem][0]['MonitoredVehicleJourney']['MonitoredCall'])
+                            
+                            # Convert Expected Arrival Time from string to DateTime object 
+                            expected_arrival_time_str_UTC = response_json[item][subitem][subsubitem][0]['MonitoredVehicleJourney']['MonitoredCall']['ExpectedArrivalTime']
+                            expected_arrival_time_UTC = datetime.strptime(expected_arrival_time_str_UTC, '%Y-%m-%dT%H:%M:%SZ')
 
-                            print("ExpectedArrivalTime: ", response_json[item][subitem][subsubitem][0]['MonitoredVehicleJourney']['MonitoredCall']['ExpectedArrivalTime'])
-                            print("Type ExpectedArrivalTime: ", type(response_json[item][subitem][subsubitem][0]['MonitoredVehicleJourney']['MonitoredCall']['ExpectedArrivalTime']))
+                            # Correct timezone (UTC to PT)
+                            original_timezone = pytz.timezone('UTC')
+                            target_timezone = pytz.timezone('US/Pacific')
+
+                            expected_arrival_time_UTC = original_timezone.localize(expected_arrival_time_UTC)
+                            expected_arrival_time_PT = expected_arrival_time_UTC.astimezone(target_timezone)
+
+
+                            print("ExpectedArrivalTime: ", expected_arrival_time_PT)
 
 
                             
