@@ -20,11 +20,22 @@ def api_request(api_key=config.api_key, agency=config.agency, stop_code=config.s
     response_json = json.loads(codecs.decode(response.content, encoding='utf-8-sig'))
     return response_json
 
+def convert_UTC_to_PT(expected_arrival_time_UTC):
+    # Correct timezone (UTC to PT)
+    original_timezone = pytz.timezone(config.original_timezone)
+    target_timezone = pytz.timezone(config.target_timezone)
+
+    # Assign timezone to original time then convert
+    expected_arrival_time_UTC = original_timezone.localize(expected_arrival_time_UTC)
+    expected_arrival_time_PT = expected_arrival_time_UTC.astimezone(target_timezone)
+    return expected_arrival_time_PT
+
 
 # Extract needed information from JSON and reate bus_info dictionary
 def get_bus_info(response_json):
     count = 0
-    bus_info = {"bus1":{}, "bus2":{}, "bus3":{}}
+    bus_info = {"bus1":{}, "bus2":{}, "bus3":{}, "bus4":{}}
+    bus_keys = list(bus_info.keys())
 
     for content in response_json:
         print("content", content)
@@ -47,12 +58,7 @@ def get_bus_info(response_json):
                             for MonitoredVehicleJourney_var in MonitoredStopVisit_var['MonitoredVehicleJourney']:
                                 if MonitoredVehicleJourney_var == 'Monitored':
                                     monitored_status = MonitoredStopVisit_var['MonitoredVehicleJourney']['Monitored']
-                                    if count == 0:
-                                        bus_info['bus1']['status'] = monitored_status
-                                    if count == 1:
-                                        bus_info['bus2']['status'] = monitored_status
-                                    if count == 2:
-                                        bus_info['bus3']['status'] = monitored_status
+                                    bus_info[bus_keys[count]]['status'] = monitored_status
                         
                                 # Data for the stop
                                 if MonitoredVehicleJourney_var == 'MonitoredCall':
@@ -61,23 +67,11 @@ def get_bus_info(response_json):
                                     expected_arrival_time_UTC = datetime.strptime(expected_arrival_time_str_UTC, '%Y-%m-%dT%H:%M:%SZ')
 
                                     # Correct timezone (UTC to PT)
-                                    original_timezone = pytz.timezone(config.original_timezone)
-                                    target_timezone = pytz.timezone(config.target_timezone)
-
-                                    expected_arrival_time_UTC = original_timezone.localize(expected_arrival_time_UTC)  # Assign timezone to exisisting time
-                                    expected_arrival_time_PT = expected_arrival_time_UTC.astimezone(target_timezone)
-                                
-                                    if count == 0:
-                                        bus_info['bus1']['predicted_arrival_time'] = expected_arrival_time_PT
-                                    if count == 1:
-                                        bus_info['bus2']['predicted_arrival_time'] = expected_arrival_time_PT
-                                    if count == 2:
-                                        bus_info['bus3']['predicted_arrival_time'] = expected_arrival_time_PT
-                                
+                                    bus_info[bus_keys[count]]['ETA'] = convert_UTC_to_PT(expected_arrival_time_UTC)
                                     count = count + 1
-                                    
     return bus_info
 
 response_json = api_request()
+# print(response_json)
 bus_info = get_bus_info(response_json)
 print(bus_info)
