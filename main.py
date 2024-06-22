@@ -4,7 +4,6 @@ import codecs
 import json
 from datetime import datetime
 import pytz
-import pandas
 
 # Perform API Request
 def api_request(api_key=config.api_key, agency=config.agency, stop_code=config.stop_code):
