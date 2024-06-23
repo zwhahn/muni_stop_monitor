@@ -30,11 +30,15 @@ def convert_UTC_to_PT(expected_arrival_time_UTC):
     expected_arrival_time_PT = expected_arrival_time_UTC.astimezone(target_timezone)
     return expected_arrival_time_PT
 
+# Calculate if bus is late, on_time, or early
+def calculate_ProgressStatus(scheduled_time, expected_time):
+    pass
+
 
 # Extract needed information from JSON and reate bus_info dictionary
 def get_bus_info(response_json):
     count = 0
-    bus_info = {"bus1":{}, "bus2":{}, "bus3":{}, "bus4":{}}
+    bus_info = {"bus1":{}, "bus2":{}, "bus3":{}}
     bus_keys = list(bus_info.keys())
 
     for content in response_json:
@@ -56,18 +60,29 @@ def get_bus_info(response_json):
                         # print("Entered MonitoredStopVisit")
                         for MonitoredStopVisit_var in response_json[content][header][StopMonitoringDelivery_var]:
                             for MonitoredVehicleJourney_var in MonitoredStopVisit_var['MonitoredVehicleJourney']:
+                                if count > len(bus_keys):
+                                    break
+                                # Check bus is monitored
                                 if MonitoredVehicleJourney_var == 'Monitored':
                                     monitored_status = MonitoredStopVisit_var['MonitoredVehicleJourney']['Monitored']
                                     bus_info[bus_keys[count]]['status'] = monitored_status
                         
-                                # Data for the stop
+                                # Find epected arrival time and aimed arrival time
                                 if MonitoredVehicleJourney_var == 'MonitoredCall':
                                     # Convert Expected Arrival Time from string to DateTime object 
                                     expected_arrival_time_str_UTC = MonitoredStopVisit_var['MonitoredVehicleJourney']['MonitoredCall']['ExpectedArrivalTime']
+                                    aimed_arrival_time_str_UTC = MonitoredStopVisit_var['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime']
+
                                     expected_arrival_time_UTC = datetime.strptime(expected_arrival_time_str_UTC, '%Y-%m-%dT%H:%M:%SZ')
+                                    aimed_arrival_time_UTC = datetime.strptime(aimed_arrival_time_str_UTC, '%Y-%m-%dT%H:%M:%SZ')
 
                                     # Correct timezone (UTC to PT)
-                                    bus_info[bus_keys[count]]['ETA'] = convert_UTC_to_PT(expected_arrival_time_UTC)
+                                    expected_arrival_time_PT = convert_UTC_to_PT(expected_arrival_time_UTC)
+                                    aimed_arrival_time_PT = convert_UTC_to_PT(aimed_arrival_time_UTC)
+                                    
+                                    bus_info[bus_keys[count]]['ExpectedArrivalTime'] = expected_arrival_time_PT
+                                    bus_info[bus_keys[count]]['AimedArrivalTime'] = aimed_arrival_time_PT
+
                                     count = count + 1
     return bus_info
 
