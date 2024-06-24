@@ -32,7 +32,13 @@ def convert_UTC_to_PT(expected_arrival_time_UTC):
 
 # Calculate if bus is late, on_time, or early
 def calculate_ProgressStatus(scheduled_time, expected_time):
-    pass
+    difference = expected_time - scheduled_time
+    if abs(difference.total_seconds()) <= 120:
+        return 'OnTime'
+    if difference.total_seconds() > 120:
+        return 'Late'
+    if difference.total_seconds() < -120:
+        return 'Early'
 
 
 # Extract needed information from JSON and reate bus_info dictionary
@@ -82,6 +88,8 @@ def get_bus_info(response_json):
                                     
                                     bus_info[bus_keys[count]]['ExpectedArrivalTime'] = expected_arrival_time_PT
                                     bus_info[bus_keys[count]]['AimedArrivalTime'] = aimed_arrival_time_PT
+
+                                    bus_info[bus_keys[count]]['ProgressStatus'] = calculate_ProgressStatus(aimed_arrival_time_PT, expected_arrival_time_PT)
 
                                     count = count + 1
     return bus_info
